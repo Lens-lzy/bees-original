@@ -11,7 +11,7 @@ e = 8 #Elite sites
 nep = 50
 nsp = 25 
 ngh = 0.1 #local search radius
-MaxIt = 500 #itereation
+MaxIt = 100 #itereation
 
 #Shpere Function to optimize
 def Sphere(x):
