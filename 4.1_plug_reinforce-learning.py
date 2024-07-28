@@ -84,11 +84,11 @@ for it in range(MaxIt):
         state = bee[i].Position
         for _ in range(nep):
             action, _ = model(state)
-            action = action.numpy()
+            action = action.numpy() + np.random.normal(scale=0.1, size=action.shape)  # 随机噪声注入
             new_position = state + action * ngh
             new_position = np.clip(new_position, varMin, varMax)
             new_cost = Cost(new_position)
-            reward = bee[i].Cost - new_cost
+            reward = bee[i].Cost - new_cost - 0.1 * np.linalg.norm(action)  # 引入惩罚项
             train_step(state, action, reward, new_position)
             state = new_position
 
