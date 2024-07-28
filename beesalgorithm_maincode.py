@@ -64,9 +64,6 @@ newbee=Bee([],[])
 
 
 
-
-
-
 # Main Loop
 for it in range(maxIt):
     
