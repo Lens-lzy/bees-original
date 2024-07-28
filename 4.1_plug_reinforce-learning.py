@@ -3,30 +3,51 @@ import tensorflow as tf
 from keras import layers
 import matplotlib.pyplot as plot
 
-# 环境参数
-d = 2  # 维度
-n = 50  # 种群数量
-m = 20  # 最佳位置数量
-e = 8  # 精英位置数量
-nep = 50  # 精英位置的蜜蜂数量
-nsp = 25  # 选择位置的蜜蜂数量
-ngh = 0.1  # 局部搜索半径
-MaxIt = 500  # 最大迭代次数
-varMin = -10
-varMax = 10
 
-# 定义目标函数
+
+
+
+
+# 环境参数 Setting environment parameters
+d = 2  # 维度 Dimension
+n = 50  # 种群数量 Population
+m = 20  # 最佳位置数量 Best sites
+e = 8  # 精英位置数量 Elite sites
+nep = 50  # 精英位置的蜜蜂数量 Elite bees
+nsp = 25  # 选择位置的蜜蜂数量 Other bees
+ngh = 0.1  # 局部搜索半径 Local search radius
+MaxIt = 500  # 最大迭代次数 Maximum number of iterations
+varMin = -10 # 变量最小值 Minimum variable value
+varMax = 10 # 变量最大值 Maximum variable value
+
+
+
+
+
+
+
+
+# 定义目标函数 Define the objective function
 def Sphere(x):
     return np.sum(np.power(x, 2))
 
 def Cost(x):
     return Sphere(x)
 
-# 改进的演员-评论员模型
+
+
+
+
+
+
+
+# 演员-评论员模型 Actor-critic model
+
+# 定义模型 Define the model
 class ImprovedActorCritic(tf.keras.Model):
     def __init__(self, action_space):
         super(ImprovedActorCritic, self).__init__()
-        self.common = layers.Dense(256, activation="relu")  # 增加层数和神经元数量
+        self.common = layers.Dense(256, activation="relu")  # 共享层 Shared layer
         self.actor = layers.Dense(action_space, activation="tanh")
         self.critic = layers.Dense(1)
 
@@ -34,10 +55,10 @@ class ImprovedActorCritic(tf.keras.Model):
         x = self.common(inputs)
         return self.actor(x), self.critic(x)
 
-# 初始化改进的演员-评论员模型
+# 初始化模型 Initialize model
 num_actions = d - 1
 model = ImprovedActorCritic(num_actions)
-optimizer = tf.keras.optimizers.Adam(learning_rate=0.001)  # 使用自适应学习率优化器
+optimizer = tf.keras.optimizers.Adam(learning_rate=0.001)  # 使用自适应学习率优化器 Use adaptive learning rate optimizer
 huber_loss = tf.keras.losses.Huber()
 
 def train_step(state, action, reward, next_state):
@@ -61,7 +82,14 @@ def train_step(state, action, reward, next_state):
     grads = tape.gradient(loss, model.trainable_variables)
     optimizer.apply_gradients(zip(grads, model.trainable_variables))
 
-# 初始化蜜蜂种群
+
+
+
+
+
+
+
+# 初始化蜜蜂种群 Initialize bee population
 class Bee:
     def __init__(self, Position, Cost):
         self.Position = Position
@@ -77,25 +105,33 @@ BestSol = bee[0]
 BestCost = np.zeros([MaxIt, 1])
 BestPos = [None] * MaxIt
 
-# 主循环
+
+
+
+
+
+
+
+# 主循环 Main loop
+
 for it in range(MaxIt):
-    # 更新精英蜜蜂位置
+    # 更新精英蜜蜂位置 Update elite bee position
     for i in range(e):
         state = bee[i].Position
         for _ in range(nep):
             action, _ = model(state)
-            action = action.numpy() + np.random.normal(scale=0.1, size=action.shape)  # 随机噪声注入
+            action = action.numpy() + np.random.normal(scale=0.1, size=action.shape)  # 随机噪声注入 Random noise injection
             new_position = state + action * ngh
             new_position = np.clip(new_position, varMin, varMax)
             new_cost = Cost(new_position)
-            reward = bee[i].Cost - new_cost - 0.1 * np.linalg.norm(action)  # 引入惩罚项
+            reward = bee[i].Cost - new_cost - 0.1 * np.linalg.norm(action)  # 引入惩罚项 Introduce penalty term
             train_step(state, action, reward, new_position)
             state = new_position
 
             if new_cost < bee[i].Cost:
                 bee[i] = Bee(new_position, new_cost)
 
-    # 更新选择位置的蜜蜂
+    # 更新选择位置的蜜蜂 Update selected bee position
     for i in range(e, m):
         bestnewbee = Bee([], np.inf)
         for _ in range(nsp):
@@ -107,7 +143,7 @@ for it in range(MaxIt):
         if bestnewbee.Cost < bee[i].Cost:
             bee[i] = bestnewbee
 
-    # 更新非选择位置的蜜蜂
+    # 更新非选择位置的蜜蜂 Update non-selected bee position
     for i in range(m, n):
         position = np.random.uniform(varMin, varMax, size=(1, d-1))
         bee[i] = Bee(position, Cost(position))
@@ -120,7 +156,12 @@ for it in range(MaxIt):
     print(f'Iteration {it}: Best Cost = {BestCost[it]}, Best Position = {BestPos[it]}')
     ngh *= 0.95
 
-# 绘制结果
+
+
+
+
+
+# 绘制结果 Plot the results
 Y = BestCost
 X = list(range(len(Y)))
 plot.grid(True, which="both")
