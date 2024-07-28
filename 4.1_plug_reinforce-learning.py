@@ -5,9 +5,6 @@ import matplotlib.pyplot as plot
 
 
 
-
-
-
 # 环境参数 Setting environment parameters
 d = 2  # 维度 Dimension
 n = 50  # 种群数量 Population
@@ -22,11 +19,6 @@ varMax = 10 # 变量最大值 Maximum variable value
 
 
 
-
-
-
-
-
 # 定义目标函数 Define the objective function
 def Sphere(x):
     return np.sum(np.power(x, 2))
@@ -36,13 +28,7 @@ def Cost(x):
 
 
 
-
-
-
-
-
 # 演员-评论员模型 Actor-critic model
-
 # 定义模型 Define the model
 class ImprovedActorCritic(tf.keras.Model):
     def __init__(self, action_space):
@@ -84,11 +70,6 @@ def train_step(state, action, reward, next_state):
 
 
 
-
-
-
-
-
 # 初始化蜜蜂种群 Initialize bee population
 class Bee:
     def __init__(self, Position, Cost):
@@ -107,13 +88,7 @@ BestPos = [None] * MaxIt
 
 
 
-
-
-
-
-
 # 主循环 Main loop
-
 for it in range(MaxIt):
     # 更新精英蜜蜂位置 Update elite bee position
     for i in range(e):
@@ -155,8 +130,6 @@ for it in range(MaxIt):
 
     print(f'Iteration {it}: Best Cost = {BestCost[it]}, Best Position = {BestPos[it]}')
     ngh *= 0.95
-
-
 
 
 
